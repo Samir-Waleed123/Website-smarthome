@@ -2,12 +2,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
 from werkzeug.security import generate_password_hash
+from config import Config
 
 app = Flask(__name__)
 
-# Configure PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:SSfdfvxFddLIXGgTLoqqkthDHUOnlgJb@shinkansen.proxy.rlwy.net:45778/railway'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Configure application using Config class
+app.config.from_object(Config)
 
 db = SQLAlchemy(app)
 

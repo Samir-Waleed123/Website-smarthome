@@ -14,12 +14,6 @@ from werkzeug.utils import secure_filename
 import ssl
 from PIL import Image
 
-
-
-app = Flask(__name__)
-
-app.config.from_object(Config)
-
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=10)
 CORS(app)
 # Database connection setup
@@ -32,9 +26,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 print("database url",app.config['SQLALCHEMY_DATABASE_URL'])
-
-# Initialize the database
-db = SQLAlchemy(app)
 
 jwt= JWTManager(app)
 print(app.config['MQTT_BROKER'])
