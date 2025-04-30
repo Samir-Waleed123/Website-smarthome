@@ -5,7 +5,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager , create_access_token , jwt_required ,get_jwt_identity
 import paho.mqtt.client as mqtt
 from config import Config
-from init import NewUsers, User
+from init import app, db, NewUsers, User, security_db
 import base64
 from datetime import datetime,timedelta
 import os
@@ -14,8 +14,7 @@ from werkzeug.utils import secure_filename
 import ssl
 from PIL import Image
 
-app = Flask(__name__)
-db = SQLAlchemy(app)
+app.config.from_object(Config)
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=10)
 CORS(app)
 # Database connection setup
@@ -88,18 +87,6 @@ mqtt_client.subscribe("home/garden/soil")
 # Create tables in the database
 with app.app_context():
     db.create_all()
-
-# Image model (user)
-class security_db(db.Model):
-    __table_name__ = 'ai_security_images'
-    id = db.Column(db.Integer, primary_key=True)
-
-    image_data = db.Column(db.LargeBinary)
-    timestamp = db.Column(db.DateTime)
-
- 
-
-
 
 # Login page
 @app.route('/', methods=['GET'])
