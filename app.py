@@ -25,7 +25,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-print("database url",app.config['SQLALCHEMY_DATABASE_URL'])
+print("database url",app.config['SQLALCHEMY_DATABASE_URLI'])
 
 jwt= JWTManager(app)
 print(app.config['MQTT_BROKER'])
