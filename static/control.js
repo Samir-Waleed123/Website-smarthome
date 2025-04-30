@@ -50,6 +50,9 @@ function close4Modal() {
 }
 //update table functions
 function updateTable(room, device, state) {
+  if (room == "living room") {
+    room = "livingroom"; // تحويل اسم الغرفة إلى الصيغة المستخدمة في المعرفات
+  }
   const cellId = `${room}${device}State`; // اسم المعرف يعتمد على الغرفة والجهاز
   const cell = document.getElementById(cellId);
 
@@ -60,6 +63,9 @@ function updateTable(room, device, state) {
   }
 }
 function updateTable1(room, device, speed) {
+  if (room == "living room") {
+    room = "livingroom"; // تحويل اسم الغرفة إلى الصيغة المستخدمة في المعرفات
+  }
   const cellId = `${room}${device}Value`; // اسم المعرف يعتمد على الغرفة والجهاز
   const cell = document.getElementById(cellId);
 
@@ -152,8 +158,13 @@ function sendRequest(url, method, body = {}) {
 
 // التحكم في الأضواء
 function toggleLight(room) {
+  console.log("room:", room);
   const checkbox = document.getElementById(`${room}Light`);
   const state = checkbox.checked ? "ON" : "OFF";
+  if (room == "livingroom") {
+    room = "living room";
+  }
+  console.log(room);
 
   sendRequest("/api/lights", "POST", { room, state })
     .then((data) => {
@@ -174,9 +185,16 @@ function toggleFan(room) {
   }
   const state = checkbox.checked ? "255" : "0";
   console.log(state);
+  if (room == "livingroom") {
+    room = "living room";
+  }
+  console.log(room);
 
   sendRequest("/api/fans/state", "POST", { room, state })
     .then((data) => {
+      if (room == "living room") {
+        room = "livingroom"; // تحويل اسم الغرفة إلى الصيغة المستخدمة في المعرفات
+      }
       console.log(data.message);
       checkbox.checked = data.state === "255";
       updateTable(room, "Fan", data.state=== "255" ? "ON":"OFF");
@@ -195,9 +213,16 @@ function toggleFan(room) {
 
 // التحكم في سرعة المراوح
 function adjustFanSpeed(room, speed) {
+  if (room == "livingroom") {
+    room = "living room";
+  }
+  console.log(room);
   sendRequest("/api/fans/speed", "POST", { room, speed })
     .then((data) => {
       console.log(data.message);
+      if (room == "living room") {
+        room = "livingroom"; // تحويل اسم الغرفة إلى الصيغة المستخدمة في المعرفات
+      }
       document.getElementById(`${room}Speed`).textContent = data.speed;
       updateTable1(room, "Fan", data.speed);
     })
@@ -214,13 +239,20 @@ function toggleHeater(room) {
   }
   const state = checkbox.checked ? "255" : "0";
   console.log(state);
-
+  if (room == "livingroom") {
+    room = "living room";
+  }
+  console.log(room);
   sendRequest("/api/heater/state", "POST", { room, state })
     .then((data) => {
       console.log(data.message);
       checkbox.checked = data.state === "255";
       updateTable(room, "Heater", data.state=== "255" ? "ON":"OFF");
       if(data.state==="0"){
+        if (room == "living room") {
+          room = "livingroom"; // تحويل اسم الغرفة إلى الصيغة المستخدمة في المعرفات
+        }
+
         document.getElementById(`${room}HeaterSpeed`).value = 0;
         document.getElementById(`${room}HeaterSpeed`).nextElementSibling.textContent = "0";
         updateTable1(room, "Heater","0");
@@ -235,6 +267,10 @@ function toggleHeater(room) {
 
 // التحكم في سرعة المدفأة
 function adjustHeaterSpeed(room, speed) {
+  if (room == "livingroom") {
+    room = "living room";
+  }
+  console.log(room);
   sendRequest("/api/heater/speed", "POST", { room, speed })
     .then((data) => {
       console.log(data.message);
