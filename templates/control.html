@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Smart Home Control</title>
+    <link rel="stylesheet" href="../static/control.css">
+</head>
+<body>
+    <button class="return" id="return" onclick="Return()"><i class="fa-solid fa-arrow-left"></i>Return</button>
+
+    <div class="container">
+        <button class="circle-button" onclick="open4Modal()">
+            <i class="fa-solid fa-list-check"></i>
+        </button>
+        
+        <button class="circle-button" onclick="openLivingRoomModal()">
+            <i class="fa-solid fa-couch"></i>
+        </button>
+        <button class="circle-button" onclick="openKitchenModal()">
+            <i class="fa-solid fa-kitchen-set"></i>
+        </button>
+        <button class="circle-button" onclick="openGardenModal()">
+            <i class="fa-solid fa-tree"></i>
+        </button>
+    </div>
+
+    <!-- Living Room Control Window -->
+    <div class="modal" id="LivingRoomModal">
+        <div class="modal-header">Living Room</div>
+        <div class="modal-body">
+            <div class="control">
+                <div class="icon-small"><i class="fa-solid fa-lightbulb"></i></div>
+                <div class="room">Light</div>
+                <div class="led-button">
+                    <label for="livingroomLight">
+                        <input type="checkbox" id="livingroomLight" onchange="toggleLight('livingroom')">
+                        <span class="handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="control">
+                <div class="icon-small"><i class="fa-solid fa-fan"></i></div>
+                <div class="room">Fan</div>
+                <div class="led-button">
+                    <label for="livingroomFan">
+                        <input type="checkbox" id="livingroomFan" onchange="toggleFan('livingroom')">
+                        <span class="handle"></span>
+                    </label>
+                </div>
+                <div class="fan-speed">
+                    <input type="range" id="livingroomSpeed" min="0" max="255" value="0" onchange="adjustFanSpeed('livingroom', this.value)">
+                    <p>0</p>
+                </div>
+            </div>
+            <div class="control">
+                <div class="icon-small"><span class="emoji-icon">🌡️</span></div>
+                <div class="room">Heater</div>
+                <div class="led-button">
+                    <label for="livingroomHeater">
+                        <input type="checkbox" id="livingroomHeater" onchange="toggleHeater('livingroom')">
+                        <span class="handle"></span>
+                    </label>
+                </div>
+                <div class="heater-speed">
+                    <input type="range" id="livingroomHeaterSpeed" min="0" max="255" value="0" onchange="adjustHeaterSpeed('livingroom', this.value)">
+                    <p>0</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <hr>
+            <button class="close-button" onclick="closeLivingRoomModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Kitchen Control Window -->
+    <div class="modal" id="KitchenModal">
+        <div class="modal-header">Kitchen</div>
+        <div class="modal-body">
+            <div class="control">
+                <div class="icon-small"><i class="fa-solid fa-lightbulb"></i></div>
+                <div class="room">Light</div>
+
+<div class="led-button">
+                    <label for="kitchenLight">
+                        <input type="checkbox" id="kitchenLight" onchange="toggleLight('kitchen')">
+                        <span class="handle"></span>
+                    </label>
+                </div>
+            </div>
+            <div class="control">
+                <div class="icon-small"><i class="fa-solid fa-fan"></i></div>
+                <div class="room">Fan</div>
+                <div class="led-button">
+                    <label for="kitchenFan">
+                        <input type="checkbox" id="kitchenFan" onchange="toggleFan('kitchen')">
+                        <span class="handle"></span>
+                    </label>
+                </div>
+                <div class="fan-speed">
+                    <input type="range" id="kitchenSpeed" min="0" max="255" value="0" onchange="adjustFanSpeed('kitchen', this.value)">
+                    <p>0</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <hr>
+            <button class="close-button" onclick="closeKitchenModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Garden Control Window -->
+    <div class="modal" id="GardenModal">
+        <div class="modal-header">Garden</div>
+        <div class="modal-body">
+            <div class="control">
+                <div class="icon-small"><i class="fa-solid fa-lightbulb"></i></div>
+                <div class="room">Light</div>
+                <div class="led-button">
+                    <label for="gardenLight">
+                        <input type="checkbox" id="gardenLight" onchange="toggleLight('garden')">
+                        <span class="handle"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <hr>
+            <button class="close-button" onclick="closeGardenModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Device Manager -->
+    <div class="modal" id="deviceModal">
+        <div class="modal-header">Device Status</div>
+        <div class="modal-body">
+            <table>
+                <div class="state">Light Status</div>
+                <thead>
+                    <tr>
+                        <th>Living Room Light</th>
+                        <th>Kitchen Light</th>
+                        <th>Garden Light</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="livingroomLightState">OFF</td>
+                        <td id="kitchenLightState">OFF</td>
+                        <td id="gardenLightState">OFF</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table>
+                <div class="state">Fan Status</div>
+                <thead>
+                    <tr>
+                        <th>Living Room Fan</th>
+                        <th>Speed</th>
+                        <th>Kitchen Fan</th>
+                        <th>Speed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="livingroomFanState">OFF</td>
+                        <td id="livingroomFanValue">0</td>
+                        <td id="kitchenFanState">OFF</td>
+                        <td id="kitchenFanValue">0</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table>
+                <div class="state">Heater Status</div>
+                <thead>
+                    <tr>
+                        <th>Living Room Heater</th>
+                        <th>Speed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="livingroomHeaterState">OFF</td>
+
+
+<td id="livingroomHeaterValue">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <hr>
+            <button class="close-button" onclick="close4Modal()">Close</button>
+        </div>
+    </div>
+
+    <script src="../static/control.js"></script>
+</body>
+</html>

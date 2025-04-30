@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+        integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Warning</title>
+    <link rel="stylesheet" href="../static/warning.css">
+</head>
+
+<body>
+    <button class=" return" id="return" onclick="Return()"><i class="fa-solid fa-arrow-left"></i>Return</button>
+    <div class="container">
+        <h1>Gallery</h1>
+
+        <!-- Start the gallery grid -->
+        <div class="gallery-grid">
+            {% for image in images %}
+            <div class="image-card"  data-image-id="{{image.id}}">
+                <h3>{{ image.username }}</h3>
+                <!-- Image display -->
+                <img  alt="{{ image.image_filename }}">
+
+                <!-- Message to indicate the stranger -->
+                <div class="warning-message">
+                    <p>Warning: This is a stranger!</p>
+                </div>
+
+                <!-- Timestamp -->
+                <p>Time: {{ image.timestamp }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="../static/warning.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"
+        integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <title>Slide Menu</title>
+  <link rel="stylesheet" href="../static/styles.css">
+</head>
+
+<body>
+  <a href="#" onclick="goToRegister()" class="register-button">
+    <i class="fa-solid fa-user-plus"></i> Registration
+</a>
+
+  <div class="menu-overlay hidden"></div>
+  <div class="sidebar hidden">
+    <button class="close-btn" id="close-btn">×</button>
+    <ul class="menu">
+      <!-- <li><i class="icon">💻</i> Associates</li> -->
+      <li id="control" onclick="goToControl()"><i class="icon">⚙️</i> Control Panel</li>
+      <li id="monitor" onclick="goToMonitor()"><i class="icon">📊</i> Monitor</li>
+      <li id="upload" onclick="goToUpload()"><i class="fa-solid fa-user-plus icon"></i> Add User</li>
+      <li id="signOutBtn"><i class="icon signOutBtn">🚪</i> Sign out</li>
+      <li id="warning" onclick="goToWarning()"><i class="icon">⚠️</i> Warning</li>
+      
+      
+    </ul>
+
+  </div>
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <p>Are you sure you want to sign out?</p>
+      <button id="confirmYes">Yes</button>
+      <button id="confirmNo">No</button>
+    </div>
+  </div>
+  <button class="menu-btn" id="menu-btn">☰MENU</button>
+  <div class="content">
+    <h1>Smart Home System</h1>
+  </div>
+
+  <script src="../static/script.js"></script>
+</body>
+
+</html>
