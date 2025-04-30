@@ -31,7 +31,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-print("database uri",app.config['SQLALCHEMY_DATABASE_URI'])
+print("database url",app.config['SQLALCHEMY_DATABASE_URL'])
 
 # Initialize the database
 db = SQLAlchemy(app)
