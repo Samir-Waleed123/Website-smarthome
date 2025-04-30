@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Smart Home Control</title>
-    <link rel="stylesheet" href="../static/control.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='control.css') }}">
 </head>
 <body>
     <button class="return" id="return" onclick="Return()"><i class="fa-solid fa-arrow-left"></i>Return</button>
@@ -196,6 +196,6 @@
         </div>
     </div>
 
-    <script src="../static/control.js"></script>
+    <script src="{{ url_for('static', filename='control.js') }}"></script>
 </body>
 </html>
