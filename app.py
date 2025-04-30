@@ -5,7 +5,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager , create_access_token , jwt_required ,get_jwt_identity
 import paho.mqtt.client as mqtt
 from config import Config
-from init import app, db, NewUsers, User
+from init import NewUsers, User
 import base64
 from datetime import datetime,timedelta
 import os
@@ -14,6 +14,8 @@ from werkzeug.utils import secure_filename
 import ssl
 from PIL import Image
 
+app = Flask(__name__)
+db = SQLAlchemy(app)
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=10)
 CORS(app)
 # Database connection setup
