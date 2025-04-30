@@ -1,11 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
+from werkzeug.security import generate_password_hash
 
 app = Flask(__name__)
 
 # Configure PostgreSQL database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:gnSSUHvTPjzHEqvYxUXJeYlurycjbiZF@yamabiko.proxy.rlwy.net:41235/railway'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:SSfdfvxFddLIXGgTLoqqkthDHUOnlgJb@shinkansen.proxy.rlwy.net:45778/railway'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -24,6 +25,28 @@ class NewUsers(db.Model):
     image2_filename = db.Column(db.String(255), nullable=False)
     image3_filename = db.Column(db.String(255), nullable=False)
 
+    # Database model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
+def create_user(username, password):
+    password = generate_password_hash(password)
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    return new_user
+
+# Image model (user)
+class security_db(db.Model):
+    __table_name__ = 'ai_security_images'
+    id = db.Column(db.Integer, primary_key=True)
+
+    image_data = db.Column(db.LargeBinary)
+    timestamp = db.Column(db.DateTime)
+
+
 if __name__ == '__main__':
     with app.app_context():
         # Use the inspect function to check if the table exists
@@ -33,3 +56,6 @@ if __name__ == '__main__':
             print("Database table created successfully!")
         else:
             print("Database table already exists!")
+        # Example: create a user
+        # Uncomment and edit the following line to create a user
+        create_user('admin', '1234')

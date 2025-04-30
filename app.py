@@ -15,6 +15,7 @@ import ssl
 from PIL import Image
 
 
+
 app = Flask(__name__)
 
 app.config.from_object(Config)
@@ -30,6 +31,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+print("database uri",app.config['SQLALCHEMY_DATABASE_URI'])
 
 # Initialize the database
 db = SQLAlchemy(app)
