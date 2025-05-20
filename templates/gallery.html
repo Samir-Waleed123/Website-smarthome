@@ -102,32 +102,36 @@
 </head>
 
 <body>
-    <div class="gallery-header">
-        <h1>{{ user_data.username }}'s Gallery</h1>
-        <a href="#" onclick="goToUpload()" class="back-link">← Back to Home</a>
-    </div>
+    <div id="main-content">
+        <div class="gallery-header">
+            <h1>{{ user_data.username }}'s Gallery</h1>
+            <a href="#" onclick="goToUpload()" class="back-link">← Back to Home</a>
+        </div>
 
-    <div class="gallery-container">
-        {% for image in user_data.images %}
-        <div class="image-card">
-            <div class="image-container">
-                <img src="data:image/jpeg;base64,{{ image.data }}" alt="{{ image.filename }}">
+        <div class="gallery-container">
+            {% for image in user_data.images %}
+            <div class="image-card">
+                <div class="image-container">
+                    <img src="data:image/jpeg;base64,{{ image.data }}" alt="{{ image.filename }}">
+                </div>
+                <div class="image-info">
+
+                    <a href="data:image/jpeg;base64,{{ image.data }}" class="download-btn"
+                        download="{{ image.filename }}">
+                        Download Image
+                    </a>
+                </div>
             </div>
-            <div class="image-info">
-                
-                <a href="data:image/jpeg;base64,{{ image.data }}" class="download-btn" download="{{ image.filename }}">
-                    Download Image
-                </a>
+            {% else %}
+            <div class="no-images">
+                <h2>No images found in this gallery</h2>
+                <p>This user hasn't uploaded any images yet.</p>
             </div>
+            {% endfor %}
         </div>
-        {% else %}
-        <div class="no-images">
-            <h2>No images found in this gallery</h2>
-            <p>This user hasn't uploaded any images yet.</p>
-        </div>
-        {% endfor %}
     </div>
     <script src="../static/gallery.js"></script>
+
 </body>
 
 </html>
