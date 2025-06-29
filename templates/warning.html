@@ -8,31 +8,94 @@
         integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>Warning</title>
-    <link rel="stylesheet" href="../static/warning.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f6f7;
+            color: #34495e;
+            padding: 50px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #141414;
+            font-size: 42px;
+            margin-bottom: 40px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .image-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            text-align: center;
+            padding: 25px;
+        }
+
+        .return {
+            margin-top: -20px;
+            font-weight: bolder;
+            width: 100px;
+            height: 40px;
+            background: #e0e0e0;
+            border: none;
+            color: #333;
+            border-radius: 10px;
+            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='warning.css') }}">
 </head>
 
 <body>
-    <button class=" return" id="return" onclick="Return()"><i class="fa-solid fa-arrow-left"></i>Return</button>
-    <div class="container">
-        <h1>Gallery</h1>
+    <div id="main-content">
+        <button class=" return" id="return" onclick="Return()"><i class="fa-solid fa-arrow-left"></i>Return</button>
+        <div class="container">
+            <h1>Gallery</h1>
 
-        <!-- Start the gallery grid -->
-        <div class="gallery-grid">
-            {% for image in images %}
-            <div class="image-card"  data-image-id="{{image.id}}">
-                <h3>{{ image.username }}</h3>
-                <!-- Image display -->
-                <img  alt="{{ image.image_filename }}">
+            <!-- Start the gallery grid -->
+            <div class="gallery-grid">
+                {% for image in images %}
+                <div class="image-card" data-image-id="{{image.id}}">
+                    <h3>{{ image.username }}</h3>
+                    <!-- Image display -->
+                    <img alt="{{ image.image_filename }}">
 
-                <!-- Message to indicate the stranger -->
-                <div class="warning-message">
-                    <p>Warning: This is a stranger!</p>
+                    <!-- Message to indicate the stranger -->
+                    <div class="warning-message">
+                        <p>Warning: This is a stranger!</p>
+                    </div>
+
+                    <!-- Timestamp -->
+                    <p>Time: {{ image.timestamp }}</p>
                 </div>
-
-                <!-- Timestamp -->
-                <p>Time: {{ image.timestamp }}</p>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
     <script src="../static/warning.js"></script>

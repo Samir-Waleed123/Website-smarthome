@@ -18,8 +18,8 @@ app.config.from_object(Config)
 app.config['JWT_ACCESS_TOKEN_EXPIRES']=timedelta(minutes=10)
 CORS(app)
 # Database connection setup
+app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI']
 
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:gnSSUHvTPjzHEqvYxUXJeYlurycjbiZF@yamabiko.proxy.rlwy.net:41235/railway?sslmode=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -32,9 +32,9 @@ jwt= JWTManager(app)
 print(app.config['MQTT_BROKER'])
 # تخزين بيانات الحساسات
 sensor_data = {
-    "living room": {"temperature": 0, "humidity": 0},
-    "kitchen": {"temperature": 0, "humidity": 0, "gas": 0},
-    "garden": {"temperature": 0, "humidity": 0, "soil": 0},
+    "living room": {"temperature": 0.0, "humidity": 0.0},
+    "kitchen": {"temperature": 0.0, "humidity": 0.0, "gas": 0.0},
+    "garden": {"temperature": 0.0, "humidity": 0.0, "soil": 0.0},
 }
 
 # دالة استلام الرسائل من MQTT
@@ -44,9 +44,9 @@ def on_message(client, userdata, msg):
     
 
     if topic == "home/living room/temp":
-        sensor_data["livingroom"]["temperature"] = float(payload)
+        sensor_data["living room"]["temperature"] = float(payload)
     elif topic == "home/living room/humidity":
-        sensor_data["livingroom"]["humidity"] = float(payload)
+        sensor_data["living room"]["humidity"] = float(payload)
 
     elif topic == "home/kitchen/temp":
         sensor_data["kitchen"]["temperature"] = float(payload)
@@ -176,7 +176,7 @@ def upload_files():
             image_binary = file.read()
             image_data.append(image_binary)
 
-            filename = secure_filename(file.filename)
+            filename = secure_filename(file.filename or "unknown_file")
             file_path = os.path.join(user_folder, filename)
             with open(file_path, "wb") as f:
                 f.write(image_binary)
@@ -262,7 +262,6 @@ def upload_image():
     # Create an Image object
     new_image = security_db(
         image_data=image_data,
-       
         timestamp=datetime.now()
     )
 
@@ -318,7 +317,9 @@ def warning():
 @app.route("/api/lights", methods=["POST"])
 @jwt_required()
 def toggleLights():
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data provided"}), 400
     room = data.get("room")
     state = data.get("state")
 
@@ -333,7 +334,9 @@ def toggleLights():
 @app.route("/api/fans/state", methods=["POST"])
 @jwt_required()
 def toggleFans():
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data provided"}), 400
     room = data.get("room")
     state = data.get("state")
     
@@ -351,7 +354,9 @@ def toggleFans():
 @app.route("/api/fans/speed", methods=["POST"])
 @jwt_required()
 def adjustFans():
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data provided"}), 400
     room = data.get("room")
     speed = data.get("speed")
 
@@ -367,7 +372,9 @@ def adjustFans():
 @app.route("/api/heater/state", methods=["POST"])
 @jwt_required()
 def toggleHeater():
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data provided"}), 400
     room = data.get("room")
     state = data.get("state")
     
@@ -387,7 +394,9 @@ def toggleHeater():
 @app.route("/api/heater/speed", methods=["POST"])
 @jwt_required()
 def adjustHeater():
-    data = request.json
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data provided"}), 400
     room = data.get("room")
     speed = data.get("speed")
 

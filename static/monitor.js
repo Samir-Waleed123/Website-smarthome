@@ -43,9 +43,7 @@ async function fetchSensorData() {
     document.getElementById(
       "kitchen-humidity"
     ).innerHTML = `${data.kitchen.humidity} %`;
-    document.getElementById(
-      "kitchen-gas"
-    ).innerHTML = `${data.kitchen.gas} ppm`;
+    document.getElementById("kitchen-gas").innerHTML = data.kitchen.gas;
 
     document.getElementById(
       "garden-temp"
@@ -95,6 +93,3 @@ async function navigateWithAuth(route) {
 async function Return() {
   await navigateWithAuth("/dashboard");
 }
-// const client = mqtt.connect("wss://broker.emqx.io:8084/mqtt", {
-//   clientId: "web_" + Math.random().toString(16).substr(2, 8),
-// });

@@ -2,23 +2,43 @@
 <html lang="en">
 
 </html>
+
 <head>
     <meta charset="UTF-8">
     <title>Create Account</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: "Arial", sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #7f00ff, #e100ff);
+        }
+    </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
 </head>
 
 <body>
-    <div class="container">
+    <div class="container" id="main-content">
         <!-- Welcome Text Section -->
         <div class="welcome-section">
             <h1>Welcome to Smart Home</h1>
-            <p>Manage and monitor your home smartly and securely. Control lighting, temperature, and security — all in one place.</p>
+            <p>Manage and monitor your home smartly and securely. Control lighting, temperature, and security — all in
+                one place.</p>
         </div>
 
         <!-- Register Form Section -->
         <div class="login-section">
-            
+
             <h2>Create a New Account</h2>
 
             <form method="POST" id="register-form">
@@ -28,8 +48,8 @@
                 <button type="submit">Register</button>
             </form>
             <div class="ree">
-            <a href="#" id="Back-to-login">Back to Login</a>
-        </div>
+                <a href="#" id="Back-to-login">Back to Login</a>
+            </div>
         </div>
     </div>
 

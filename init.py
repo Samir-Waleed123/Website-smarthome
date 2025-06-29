@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
 from config import Config
 
+
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
@@ -37,6 +38,7 @@ def create_user(username, password):
     return user
 
 if __name__ == '__main__':
+    from werkzeug.security import generate_password_hash
     with app.app_context():
         inspector = inspect(db.engine)
         if not inspector.has_table('new_users'):
@@ -45,3 +47,15 @@ if __name__ == '__main__':
         else:
             print("Database table already exists!")
         # create_user('admin', 'your_password')
+        
+        username = 'admin'
+        password = 'project'
+        existing_user = db.session.query(User).filter_by(username=username).first()
+        if existing_user:
+            print("User already exists")
+        else:
+            password = generate_password_hash(password)
+            new_user = User(username=username, password=password)
+            db.session.add(new_user)
+            db.session.commit()
+            print("User created successfully")

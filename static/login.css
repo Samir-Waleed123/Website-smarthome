@@ -73,12 +73,10 @@ form input {
   border-radius: 25px;
   font-size: 16px;
   margin-left: 10%;
-  
 }
-.ree{
-  margin-left: 160px;
-  margin-top: 60px;
-  padding-top: 20px;
+.ree {
+  margin-top: 20px;
+  text-align: center;
 }
 
 form input:focus {
@@ -86,7 +84,6 @@ form input:focus {
   outline: none;
 }
 /* Remember and forgot password */
-
 
 /* Button Styling */
 button[type="submit"] {
@@ -100,7 +97,8 @@ button[type="submit"] {
   cursor: pointer;
   transition: background 0.3s ease;
   display: block;
-  margin: 0 auto;}
+  margin: 0 auto;
+}
 
 button[type="submit"]:hover {
   background: linear-gradient(90deg, #6a00cc, #cc00cc);
@@ -113,7 +111,6 @@ button[type="submit"]:hover {
   margin-bottom: 10px;
   display: none;
   text-align: center;
-  
 }
 /* Responsive */
 @media (max-width: 768px) {
@@ -129,7 +126,7 @@ button[type="submit"]:hover {
     padding: 40px 20px;
   }
 
-.welcome-section h1 {
-  font-size: 28px;
-}
+  .welcome-section h1 {
+    font-size: 28px;
+  }
 }

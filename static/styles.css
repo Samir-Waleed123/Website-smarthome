@@ -107,66 +107,7 @@ h1 {
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
 
-/* صفحة تسجيل الدخول */
-.login-container {
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  width: 300px;
-  margin: auto;
-  margin-top: 10%;
-}
-
-.login-container h1 {
-  margin-bottom: 20px;
-  font-size: 24px;
-  color: #2c3e50;
-}
-
-.form-group {
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 14px;
-}
-
-.btn {
-  width: 100%;
-  padding: 10px;
-  background-color: #3498db;
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.btn:hover {
-  background-color: #2980b9;
-}
-
-/* لوحة التحكم */
-.container {
-  display: flex;
-  height: 100vh;
-}
-
 /* confirm sign out */
-
 .modal {
   display: none;
   position: fixed;

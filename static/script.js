@@ -103,37 +103,3 @@ async function goToRegister() {
   await navigateWithAuth("/register");
 }
 
-// async function goToGallery() {
-//   await navigateWithAuth("/gallery");}
-
-//   function goToWarning() {
-//     const token = localStorage.getItem("token");
-//     if (!token) {
-//       alert("You need to log in first");
-//       window.location.href = "/";
-//       return;
-//     }
-
-//     fetch("/warnings", {
-//       method: "GET",
-//       headers: {
-//         Authorization: "Bearer " + token
-//       }
-//     })
-//     .then(response => {
-//       if (response.redirected) {
-//         window.location.href = response.url;
-//       } else {
-//         return response.text();
-//       }
-//     })
-//     .then(html => {
-//       document.open();
-//       document.write(html);
-//       document.close();
-//     })
-//     .catch(error => {
-//       console.error("Error:", error);
-//       alert("Could not load the warning page");
-//     });
-//   }
