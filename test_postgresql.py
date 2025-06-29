@@ -19,7 +19,7 @@ def test_postgresql_connection():
             inspector = inspect(db.engine)
             tables = inspector.get_table_names()
             print(f"Existing tables: {tables}")
-            
+             
             # Create tables if they don't exist
             db.create_all()
             print("Tables created/verified successfully!")
