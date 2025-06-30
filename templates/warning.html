@@ -129,10 +129,50 @@
             font-size: 14px;
         }
 
+        .timestamp-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
         .timestamp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             font-size: 14px;
-            opacity: 0.8;
-            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .timestamp i {
+            color: #4CAF50;
+            font-size: 16px;
+        }
+
+        .time-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .date-display {
+            font-size: 16px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .time-display {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .time-ago {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
         }
 
         .empty-state {
@@ -207,9 +247,27 @@
                     <i class="fa-solid fa-camera"></i> Loading image...
                 </div>
                 
-                <div class="timestamp">
-                    <i class="fa-solid fa-clock"></i>
-                    {{ image.timestamp.strftime('%Y-%m-%d %H:%M:%S') if image.timestamp else 'Unknown time' }}
+                <div class="timestamp-container">
+                    <div class="timestamp">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>Detected</span>
+                    </div>
+                    <div class="time-details">
+                        {% if image.timestamp %}
+                            <div class="date-display">
+                                {{ image.timestamp.strftime('%B %d, %Y') }}
+                            </div>
+                            <div class="time-display">
+                                {{ image.timestamp.strftime('%I:%M %p') }}
+                            </div>
+                            <div class="time-ago" data-timestamp="{{ image.timestamp.isoformat() }}">
+                                <!-- Will be filled by JavaScript -->
+                            </div>
+                        {% else %}
+                            <div class="date-display">Unknown Date</div>
+                            <div class="time-display">Unknown Time</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -224,6 +282,34 @@
     </div>
 
     <script>
+        // Function to calculate time ago
+        function timeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) {
+                return 'Just now';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            } else {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} day${days > 1 ? 's' : ''} ago`;
+            }
+        }
+
+        // Function to update time ago for all timestamps
+        function updateTimeAgo() {
+            const timeAgoElements = document.querySelectorAll('.time-ago[data-timestamp]');
+            timeAgoElements.forEach(element => {
+                const timestamp = new Date(element.dataset.timestamp);
+                element.textContent = timeAgo(timestamp);
+            });
+        }
+
         // Function to load images with authentication
         async function loadSecurityImages() {
             const token = localStorage.getItem("token");
@@ -270,9 +356,13 @@
             }
         }
 
-        // Load images when page loads
+        // Load images and update time when page loads
         document.addEventListener('DOMContentLoaded', function() {
             loadSecurityImages();
+            updateTimeAgo();
+            
+            // Update time ago every minute
+            setInterval(updateTimeAgo, 60000);
         });
     </script>
 
