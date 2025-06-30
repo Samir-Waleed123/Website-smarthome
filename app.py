@@ -284,15 +284,16 @@ def view_image(image_id):
     if not image:
         return "Image not found!", 404
 
-    # حملي الصورة من البيانات المخزنة في الذاكرة
+    # Load image from stored data
     image_stream = io.BytesIO(image.image_data)
     try:
         img = Image.open(image_stream)
-        try:
-            r, g, b = img.split()
-            rgb_img = Image.merge("RGB", (b, g, r))
-        except:
+        
+        # Convert to RGB if needed, but don't swap channels
+        if img.mode != 'RGB':
             rgb_img = img.convert("RGB")
+        else:
+            rgb_img = img
        
         output_stream = io.BytesIO()
         rgb_img.save(output_stream, format="JPEG")
