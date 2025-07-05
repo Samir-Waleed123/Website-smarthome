@@ -32,9 +32,9 @@ jwt= JWTManager(app)
 print(app.config['MQTT_BROKER'])
 # تخزين بيانات الحساسات
 sensor_data = {
-    "living room": {"temperature": 0.0, "humidity": 0.0},
-    "kitchen": {"temperature": 0.0, "humidity": 0.0, "gas": 0.0},
-    "garden": {"temperature": 0.0, "humidity": 0.0, "soil": 0.0},
+    "livingRoom": {"temperature": 0, "humidity": 0},
+    "kitchen": {"temperature": 0, "humidity": 0, "gas": "unknown"},
+    "garden": {"temperature": 0, "humidity": 0, "soil": 0},
 }
 
 # دالة استلام الرسائل من MQTT
@@ -43,17 +43,17 @@ def on_message(client, userdata, msg):
     payload = msg.payload.decode()
     
 
-    if topic == "home/living room/temp":
-        sensor_data["living room"]["temperature"] = float(payload)
-    elif topic == "home/living room/humidity":
-        sensor_data["living room"]["humidity"] = float(payload)
+    if topic == "home/livingroom/temp":
+        sensor_data["livingRoom"]["temperature"] = float(payload)
+    elif topic == "home/livingroom/humidity":
+        sensor_data["livingRoom"]["humidity"] = float(payload)
 
     elif topic == "home/kitchen/temp":
         sensor_data["kitchen"]["temperature"] = float(payload)
     elif topic == "home/kitchen/humidity":
         sensor_data["kitchen"]["humidity"] = float(payload)
     elif topic == "home/kitchen/gas":
-        sensor_data["kitchen"]["gas"] = float(payload)
+        sensor_data["kitchen"]["gas"] = payload
 
     elif topic == "home/garden/temp":
         sensor_data["garden"]["temperature"] = float(payload)
@@ -74,8 +74,8 @@ mqtt_client.connect(app.config['MQTT_BROKER'], app.config['MQTT_PORT'],6000)
 mqtt_client.loop_start()
 
 # الاشتراك في المواضيع
-mqtt_client.subscribe("home/living room/temp")
-mqtt_client.subscribe("home/living room/humidity")
+mqtt_client.subscribe("home/livingroom/temp")
+mqtt_client.subscribe("home/livingroom/humidity")
 mqtt_client.subscribe("home/kitchen/temp")
 mqtt_client.subscribe("home/kitchen/humidity")
 mqtt_client.subscribe("home/kitchen/gas")
