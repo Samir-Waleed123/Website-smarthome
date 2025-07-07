@@ -1,13 +1,13 @@
-from flask import Flask, render_template, request, url_for ,jsonify,send_file,send_from_directory
+from flask import Flask, render_template, request, url_for, jsonify, send_file, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager , create_access_token , jwt_required ,get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import paho.mqtt.client as mqtt
 from config import Config
 from init import app, db, NewUsers, User, security_db
 import base64
-from datetime import datetime,timedelta
+from datetime import datetime, timedelta
 import os
 import io
 from werkzeug.utils import secure_filename
@@ -30,42 +30,57 @@ print("database url",app.config['SQLALCHEMY_DATABASE_URI'])
 
 jwt= JWTManager(app)
 print(app.config['MQTT_BROKER'])
-# تخزين بيانات الحساسات
+# monitor
 sensor_data = {
     "livingRoom": {"temperature": 0, "humidity": 0},
     "kitchen": {"temperature": 0, "humidity": 0, "gas": "unknown"},
     "garden": {"temperature": 0, "humidity": 0, "soil": 0},
 }
+#control
+device_data = {
+    "living room": {"light": "OFF", "fan": "0"},
+    "kitchen": {"light": "OFF", "fan": "0"},
+    "garden": {"light": "OFF"}
+}
 
-# دالة استلام الرسائل من MQTT
 def on_message(client, userdata, msg):
     topic = msg.topic
     payload = msg.payload.decode()
     
+    
+    normalized_payload = payload.upper() if payload.lower() in ['on', 'off'] else payload
 
+    # تحديث بيانات الحساسات
     if topic == "home/livingroom/temp":
         sensor_data["livingRoom"]["temperature"] = float(payload)
     elif topic == "home/livingroom/humidity":
         sensor_data["livingRoom"]["humidity"] = float(payload)
-
     elif topic == "home/kitchen/temp":
         sensor_data["kitchen"]["temperature"] = float(payload)
     elif topic == "home/kitchen/humidity":
         sensor_data["kitchen"]["humidity"] = float(payload)
     elif topic == "home/kitchen/gas":
         sensor_data["kitchen"]["gas"] = payload
-
     elif topic == "home/garden/temp":
         sensor_data["garden"]["temperature"] = float(payload)
     elif topic == "home/garden/humidity":
         sensor_data["garden"]["humidity"] = float(payload)
     elif topic == "home/garden/soil":
-        sensor_data["garden"]["soil"] = float(payload) # Good أو Need to water
+        sensor_data["garden"]["soil"] = float(payload)
+    
+    # تحديث حالات الأجهزة
+    elif topic == "home/living room/lamp":
+        device_data["living room"]["light"] = normalized_payload
+    elif topic == "home/kitchen/lamp":
+        device_data["kitchen"]["light"] = normalized_payload
+    elif topic == "home/garden/lamp":
+        device_data["garden"]["light"] = normalized_payload
+    elif topic == "home/living room/fan":
+        device_data["living room"]["fan"] = payload
+    elif topic == "home/kitchen/fan":
+        device_data["kitchen"]["fan"] = payload
 
     print(f"Received message: {topic} -> {payload}")
-    # socketio.emit('mqtt_message',{'topic':topic, 'payload':payload})
-# mqtt setup
-
 mqtt_client = mqtt.Client()
 mqtt_client.username_pw_set(app.config['MQTT_USER'],app.config['MQTT_PASSWORD'])
 mqtt_client.tls_set(tls_version=ssl.PROTOCOL_TLS)
@@ -73,7 +88,7 @@ mqtt_client.on_message = on_message
 mqtt_client.connect(app.config['MQTT_BROKER'], app.config['MQTT_PORT'],6000)
 mqtt_client.loop_start()
 
-# الاشتراك في المواضيع
+# topics
 mqtt_client.subscribe("home/livingroom/temp")
 mqtt_client.subscribe("home/livingroom/humidity")
 mqtt_client.subscribe("home/kitchen/temp")
@@ -82,6 +97,12 @@ mqtt_client.subscribe("home/kitchen/gas")
 mqtt_client.subscribe("home/garden/temp")
 mqtt_client.subscribe("home/garden/humidity")
 mqtt_client.subscribe("home/garden/soil")
+
+mqtt_client.subscribe("home/living room/lamp")
+mqtt_client.subscribe("home/kitchen/lamp")
+mqtt_client.subscribe("home/garden/lamp")
+mqtt_client.subscribe("home/living room/fan")
+mqtt_client.subscribe("home/kitchen/fan")
 
 
 # Create tables in the database
@@ -311,10 +332,11 @@ def warning():
     
     return render_template('warning.html', images=images)
 
-
-
-    
-# التحكم بالأضواء
+@app.route("/api/device-status", methods=["GET"])
+@jwt_required()
+def get_device_status():
+    return jsonify(device_data)
+  
 @app.route("/api/lights", methods=["POST"])
 @jwt_required()
 def toggleLights():
@@ -322,16 +344,15 @@ def toggleLights():
     if not data:
         return jsonify({"error": "No JSON data provided"}), 400
     room = data.get("room")
-    state = data.get("state")
+    state = data.get("state").upper()  # توحيد الحالة
 
-    # نشر رسالة MQTT
     topic = f"home/{room}/lamp"
     mqtt_client.publish(topic, state)
     print(f"Published to {topic}: {state}")
 
+    device_data[room]["light"] = state
     return jsonify({"message": f"Light in {room} is now {state}", "state": state})
 
-# التحكم بالمراوح
 @app.route("/api/fans/state", methods=["POST"])
 @jwt_required()
 def toggleFans():
@@ -339,19 +360,16 @@ def toggleFans():
     if not data:
         return jsonify({"error": "No JSON data provided"}), 400
     room = data.get("room")
-    state = data.get("state")
-    
-    # نشر رسالة MQTT
+    state = data.get("state")  # "255" أو "0"
+
     topic = f"home/{room}/fan"
     mqtt_client.publish(topic, state)
     print(f"Published to {topic}: {state}")
 
-    # print(f"Fan in {room} is {state} ")
-
-    return jsonify({"message": f"Fan in {room} is {state}" ,"state": state})
+    device_data[room]["fan"] = state
+    return jsonify({"message": f"Fan in {room} is {state}", "state": state})
 
 # التحكم بسرعة المراوح
-
 @app.route("/api/fans/speed", methods=["POST"])
 @jwt_required()
 def adjustFans():
@@ -361,54 +379,12 @@ def adjustFans():
     room = data.get("room")
     speed = data.get("speed")
 
- # نشر رسالة MQTT
     topic = f"home/{room}/fan"
     mqtt_client.publish(topic, speed)
     print(f"Published to {topic}: {speed}")
-    # print(f"Fan in {room}  set to  speed {speed}")
 
-    return jsonify({"message": f"Fan in {room}  set to speed {speed}", "speed": speed })
-
-# heater control
-@app.route("/api/heater/state", methods=["POST"])
-@jwt_required()
-def toggleHeater():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No JSON data provided"}), 400
-    room = data.get("room")
-    state = data.get("state")
-    
-
-   
-    # نشر رسالة MQTT
-    topic = f"home/{room}/heater"
-    mqtt_client.publish(topic, state)
-    print(f"Published to {topic}: {state}")
-
-    # print(f"Heater in {room} is {state} ")
-
-    return jsonify({"message": f"Heater in {room} is {state}" ,"state": state})
-
-# heater speed control
-
-@app.route("/api/heater/speed", methods=["POST"])
-@jwt_required()
-def adjustHeater():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No JSON data provided"}), 400
-    room = data.get("room")
-    speed = data.get("speed")
-
-    # نشر رسالة MQTT
-    topic = f"home/{room}/heater"
-    mqtt_client.publish(topic, speed)
-    print(f"Published to {topic}: {speed}")
-
-    #    print(f"Heater in {room} set to speed {speed}")
-
-    return jsonify({"message": f"Heater in {room}  set to speed {speed}", "speed": speed })
+    device_data[room]["fan"] = speed
+    return jsonify({"message": f"Fan in {room} set to speed {speed}", "speed": speed})
 
 from flask import request
 

@@ -4,40 +4,102 @@ document.addEventListener("DOMContentLoaded", () => {
     alert("Session expired. Please log in again.");
     window.location.href = "/";
   }
+
+  // بدء البولينج لجلب حالات الأجهزة
+  startPolling();
 });
-/*open  light settings */
+
+// دالة البولينج
+function startPolling() {
+  const pollInterval = 5000; // كل 5 ثوانٍ
+  setInterval(() => {
+    fetchDeviceStatus();
+  }, pollInterval);
+  fetchDeviceStatus(); // جلب الحالة فورًا عند التحميل
+}
+
+// جلب حالات الأجهزة من الخادم
+function fetchDeviceStatus() {
+  sendRequest("/api/device-status", "GET")
+    .then((data) => {
+      updateUI(data);
+    })
+    .catch((error) => console.error("Error fetching device status:", error));
+}
+
+// تحديث واجهة المستخدم بناءً على البيانات
+function updateUI(data) {
+  // تحديث الأضواء
+  updateLightUI("living room", data["living room"].light);
+  updateLightUI("kitchen", data["kitchen"].light);
+  updateLightUI("garden", data["garden"].light);
+
+  // تحديث المراوح
+  updateFanUI("living room", data["living room"].fan);
+  updateFanUI("kitchen", data["kitchen"].fan);
+}
+
+function updateLightUI(room, state) {
+  const normalizedRoom = room === "living room" ? "livingroom" : room;
+  const checkbox = document.getElementById(`${normalizedRoom}Light`);
+  const normalizedState = state.toUpperCase();
+  if (checkbox) {
+    checkbox.checked = normalizedState === "ON";
+    updateTable(room, "Light", normalizedState);
+  }
+}
+
+function updateFanUI(room, speed) {
+  const normalizedRoom = room === "living room" ? "livingroom" : room;
+  const checkbox = document.getElementById(`${normalizedRoom}Fan`);
+  const speedSlider = document.getElementById(`${normalizedRoom}Speed`);
+  const speedValue = speedSlider.nextElementSibling;
+  if (checkbox && speedSlider && speedValue) {
+    const isOn = speed !== "0";
+    checkbox.checked = isOn;
+    speedSlider.value = speed;
+    speedValue.textContent = speed;
+    speedSlider.disabled = !isOn;
+    speedSlider.title = isOn ? "" : "Turn on the fan to adjust speed";
+    updateTable(room, "Fan", isOn ? "ON" : "OFF");
+    updateTable1(room, "Fan", speed);
+  }
+}
+
+// دوال فتح وإغلاق النماذج
 function openLivingRoomModal() {
   document.getElementById("LivingRoomModal").style.display = "block";
   document.getElementById("KitchenModal").style.display = "none";
   document.getElementById("GardenModal").style.display = "none";
   document.getElementById("deviceModal").style.display = "none";
 }
-/*close  light settings */
+
 function closeLivingRoomModal() {
   document.getElementById("LivingRoomModal").style.display = "none";
 }
-/*open  fan settings */
+
 function openKitchenModal() {
   document.getElementById("KitchenModal").style.display = "block";
   document.getElementById("LivingRoomModal").style.display = "none";
   document.getElementById("GardenModal").style.display = "none";
   document.getElementById("deviceModal").style.display = "none";
 }
-//close fan settings
+
 function closeKitchenModal() {
   document.getElementById("KitchenModal").style.display = "none";
 }
-/*open  heater settings */
+
 function openGardenModal() {
   document.getElementById("GardenModal").style.display = "block";
   document.getElementById("KitchenModal").style.display = "none";
   document.getElementById("LivingRoomModal").style.display = "none";
   document.getElementById("deviceModal").style.display = "none";
 }
-//close heater settings
+
 function closeGardenModal() {
   document.getElementById("GardenModal").style.display = "none";
 }
+
 function open4Modal() {
   document.getElementById("deviceModal").style.display = "block";
   document.getElementById("KitchenModal").style.display = "none";
@@ -48,27 +110,23 @@ function open4Modal() {
 function close4Modal() {
   document.getElementById("deviceModal").style.display = "none";
 }
-//update table functions
-function updateTable(room, device, state) {
-  if (room == "living room") {
-    room = "livingroom"; // تحويل اسم الغرفة إلى الصيغة المستخدمة في المعرفات
-  }
-  const cellId = `${room}${device}State`;
-  const cell = document.getElementById(cellId);
 
+// تحديث الجداول
+function updateTable(room, device, state) {
+  const normalizedRoom = room === "living room" ? "livingroom" : room;
+  const cellId = `${normalizedRoom}${device}State`;
+  const cell = document.getElementById(cellId);
   if (cell) {
-    cell.textContent = state; // تحديث محتوى الخلية
+    cell.textContent = state.toUpperCase();
   } else {
     console.error(`Cell with ID '${cellId}' not found`);
   }
 }
-function updateTable1(room, device, speed) {
-  if (room == "living room") {
-    room = "livingroom"; // تحويل اسم الغرفة إلى الصيغة المستخدمة في المعرفات
-  }
-  const cellId = `${room}${device}Value`;
-  const cell = document.getElementById(cellId);
 
+function updateTable1(room, device, speed) {
+  const normalizedRoom = room === "living room" ? "livingroom" : room;
+  const cellId = `${normalizedRoom}${device}Value`;
+  const cell = document.getElementById(cellId);
   if (cell) {
     cell.textContent = speed;
   } else {
@@ -76,6 +134,7 @@ function updateTable1(room, device, speed) {
   }
 }
 
+// إعداد أحداث السلايدر
 document.addEventListener("DOMContentLoaded", () => {
   const livingroomSpeed = document.getElementById("livingroomSpeed");
   const livingroomSpeedValue = livingroomSpeed.nextElementSibling;
@@ -88,12 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateSliderState() {
     livingroomSpeed.disabled = !livingroomFanCheckbox.checked;
     kitchenSpeed.disabled = !kitchenFanCheckbox.checked;
-    livingroomSpeed.title = livingroomSpeed.disabled
-      ? "Turn on the fan to adjust speed"
-      : "";
-    kitchenSpeed.title = kitchenSpeed.disabled
-      ? "Turn on the fan to adjust speed"
-      : "";
+    livingroomSpeed.title = livingroomSpeed.disabled ? "Turn on the fan to adjust speed" : "";
+    kitchenSpeed.title = kitchenSpeed.disabled ? "Turn on the fan to adjust speed" : "";
   }
 
   updateSliderState();
@@ -107,16 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
   kitchenSpeed.addEventListener("input", () => {
     kitchenSpeedValue.textContent = kitchenSpeed.value;
   });
-
-  const closeButton = document.querySelector(".close-modal");
-
-  if (closeButton) {
-    closeButton.addEventListener("click", function () {
-      alert("Modal closed");
-    });
-  }
 });
-// دالة لإرسال الطلبات مع التوكن
+
+// دالة إرسال الطلبات
 function sendRequest(url, method, body = {}) {
   const token = localStorage.getItem("token");
   if (!token) {
@@ -131,7 +179,7 @@ function sendRequest(url, method, body = {}) {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(body),
+    body: method !== "GET" ? JSON.stringify(body) : undefined,
   }).then((response) => {
     if (response.status === 401) {
       alert("Session expired. Please log in again.");
@@ -139,82 +187,64 @@ function sendRequest(url, method, body = {}) {
       window.location.href = "/";
       return Promise.reject("token expired");
     }
-
     return response.json();
   });
 }
 
-// toggle lights
+// التحكم بالأضواء
 function toggleLight(room) {
-  console.log("room:", room);
+  const normalizedRoom = room === "livingroom" ? "living room" : room;
   const checkbox = document.getElementById(`${room}Light`);
   const state = checkbox.checked ? "ON" : "OFF";
-  if (room == "livingroom") {
-    room = "living room";
-  }
-  console.log(room);
 
-  sendRequest("/api/lights", "POST", { room, state })
+  sendRequest("/api/lights", "POST", { room: normalizedRoom, state })
     .then((data) => {
       console.log(data.message);
-      checkbox.checked = data.state === "ON";
-      updateTable(room, "Light", data.state);
+      checkbox.checked = data.state.toUpperCase() === "ON";
+      updateTable(normalizedRoom, "Light", data.state);
     })
     .catch((error) => console.error("Error:", error));
 }
 
-// toggle fan
+// التحكم بالمراوح
 function toggleFan(room) {
-  console.log("room:", room);
+  const normalizedRoom = room === "livingroom" ? "living room" : room;
   const checkbox = document.getElementById(`${room}Fan`);
   if (!checkbox) {
     console.error("element not found");
     return;
   }
   const state = checkbox.checked ? "255" : "0";
-  console.log(state);
-  if (room == "livingroom") {
-    room = "living room";
-  }
-  console.log(room);
 
-  sendRequest("/api/fans/state", "POST", { room, state })
+  sendRequest("/api/fans/state", "POST", { room: normalizedRoom, state })
     .then((data) => {
-      if (room == "living room") {
-        room = "livingroom";
-      }
+      const uiRoom = normalizedRoom === "living room" ? "livingroom" : normalizedRoom;
       console.log(data.message);
       checkbox.checked = data.state === "255";
-      updateTable(room, "Fan", data.state === "255" ? "ON" : "OFF");
+      updateTable(normalizedRoom, "Fan", data.state === "255" ? "ON" : "OFF");
       if (data.state === "0") {
-        document.getElementById(`${room}Speed`).value = 0;
-        document.getElementById(`${room}Speed`).nextElementSibling.textContent =
-          "0";
-        updateTable1(room, "Fan", "0");
+        document.getElementById(`${uiRoom}Speed`).value = 0;
+        document.getElementById(`${uiRoom}Speed`).nextElementSibling.textContent = "0";
+        updateTable1(normalizedRoom, "Fan", "0");
       } else {
-        document.getElementById(`${room}Speed`).value = 255;
-        document.getElementById(`${room}Speed`).nextElementSibling.textContent =
-          "255";
-        updateTable1(room, "Fan", "255");
+        document.getElementById(`${uiRoom}Speed`).value = 255;
+        document.getElementById(`${uiRoom}Speed`).nextElementSibling.textContent = "255";
+        updateTable1(normalizedRoom, "Fan", "255");
       }
     })
     .catch((error) => console.error("Error:", error));
 }
 
-// control fan speed
+// التحكم بسرعة المراوح
 function adjustFanSpeed(room, speed) {
-  if (room == "livingroom") {
-    room = "living room";
-  }
-  console.log(room);
-  sendRequest("/api/fans/speed", "POST", { room, speed })
+  const normalizedRoom = room === "livingroom" ? "living room" : room;
+  sendRequest("/api/fans/speed", "POST", { room: normalizedRoom, speed })
     .then((data) => {
       console.log(data.message);
-      if (room == "living room") {
-        room = "livingroom";
-      }
-      document.getElementById(`${room}Speed`).textContent = data.speed;
-      updateTable1(room, "Fan", data.speed);
+      const uiRoom = normalizedRoom === "living room" ? "livingroom" : normalizedRoom;
+      document.getElementById(`${uiRoom}Speed`).value = data.speed;
+      document.getElementById(`${uiRoom}Speed`).nextElementSibling.textContent = data.speed;
+      updateTable1(normalizedRoom, "Fan", data.speed);
     })
     .catch((error) => console.error("Error:", error));
 }
@@ -226,12 +256,11 @@ async function navigateWithAuth(route) {
     window.location.href = "/";
     return;
   }
-  // Fetch the dashboard page with the token
   let HtmlResponse = await fetch(route, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${token}`,
     },
   });
   if (HtmlResponse.status === 401) {
@@ -246,10 +275,11 @@ async function navigateWithAuth(route) {
 
   let pageHtml = await HtmlResponse.text();
   document.open();
-  document.write(pageHtml); // Render the dashboard page
+  document.write(pageHtml);
   document.close();
 }
-// back to dashboard
+
+// العودة إلى لوحة التحكم
 async function Return() {
   await navigateWithAuth("/dashboard");
 }
