@@ -5,9 +5,61 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "/";
   }
 
+  // Check MQTT status first
+  checkMQTTStatus();
+  
   // بدء البولينج لجلب حالات الأجهزة
   startPolling();
 });
+
+// Check MQTT connection status
+function checkMQTTStatus() {
+  sendRequest("/api/mqtt-status", "GET")
+    .then((data) => {
+      console.log("MQTT Status:", data);
+      if (data.status === "disabled" || data.status === "disconnected") {
+        console.warn("MQTT is not available. Device status updates may not work properly.");
+        // You could show a warning to the user here
+        showMQTTWarning(data.message);
+      }
+    })
+    .catch((error) => {
+      console.error("Error checking MQTT status:", error);
+      showMQTTWarning("Unable to check MQTT status");
+    });
+}
+
+// Show MQTT warning to user
+function showMQTTWarning(message) {
+  // Create a warning banner
+  const warningDiv = document.createElement('div');
+  warningDiv.style.cssText = `
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #ff6b6b;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    z-index: 1000;
+    font-size: 14px;
+    max-width: 300px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  `;
+  warningDiv.innerHTML = `
+    <strong>MQTT Warning:</strong><br>
+    ${message}<br>
+    <small>Device status updates may be delayed.</small>
+  `;
+  document.body.appendChild(warningDiv);
+  
+  // Remove warning after 10 seconds
+  setTimeout(() => {
+    if (warningDiv.parentNode) {
+      warningDiv.parentNode.removeChild(warningDiv);
+    }
+  }, 10000);
+}
 
 // دالة البولينج
 function startPolling() {

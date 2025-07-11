@@ -81,28 +81,77 @@ def on_message(client, userdata, msg):
         device_data["kitchen"]["fan"] = payload
 
     print(f"Received message: {topic} -> {payload}")
-mqtt_client = mqtt.Client()
-mqtt_client.username_pw_set(app.config['MQTT_USER'],app.config['MQTT_PASSWORD'])
-mqtt_client.tls_set(tls_version=ssl.PROTOCOL_TLS)
-mqtt_client.on_message = on_message
-mqtt_client.connect(app.config['MQTT_BROKER'], app.config['MQTT_PORT'],6000)
-mqtt_client.loop_start()
 
-# topics
-mqtt_client.subscribe("home/livingroom/temp")
-mqtt_client.subscribe("home/livingroom/humidity")
-mqtt_client.subscribe("home/kitchen/temp")
-mqtt_client.subscribe("home/kitchen/humidity")
-mqtt_client.subscribe("home/kitchen/gas")
-mqtt_client.subscribe("home/garden/temp")
-mqtt_client.subscribe("home/garden/humidity")
-mqtt_client.subscribe("home/garden/soil")
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT broker successfully!")
+        # Subscribe to topics after successful connection
+        topics = [
+            "home/livingroom/temp",
+            "home/livingroom/humidity", 
+            "home/kitchen/temp",
+            "home/kitchen/humidity",
+            "home/kitchen/gas",
+            "home/garden/temp",
+            "home/garden/humidity",
+            "home/garden/soil",
+            "home/living room/lamp",
+            "home/kitchen/lamp",
+            "home/garden/lamp",
+            "home/living room/fan",
+            "home/kitchen/fan"
+        ]
+        for topic in topics:
+            client.subscribe(topic)
+            print(f"Subscribed to: {topic}")
+    else:
+        print(f"Failed to connect to MQTT broker with code: {rc}")
 
-mqtt_client.subscribe("home/living room/lamp")
-mqtt_client.subscribe("home/kitchen/lamp")
-mqtt_client.subscribe("home/garden/lamp")
-mqtt_client.subscribe("home/living room/fan")
-mqtt_client.subscribe("home/kitchen/fan")
+def on_disconnect(client, userdata, rc):
+    if rc != 0:
+        print(f"Unexpected disconnection from MQTT broker with code: {rc}")
+    else:
+        print("Disconnected from MQTT broker")
+
+def on_log(client, userdata, level, buf):
+    print(f"MQTT Log: {buf}")
+
+# Initialize MQTT client with error handling
+try:
+    print(f"Attempting to connect to MQTT broker: {app.config['MQTT_BROKER']}:{app.config['MQTT_PORT']}")
+    print(f"Running on Railway: {app.config['IS_RAILWAY']}")
+    
+    mqtt_client = mqtt.Client()
+    mqtt_client.username_pw_set(app.config['MQTT_USER'], app.config['MQTT_PASSWORD'])
+    
+    # Set up callbacks
+    mqtt_client.on_message = on_message
+    mqtt_client.on_connect = on_connect
+    mqtt_client.on_disconnect = on_disconnect
+    mqtt_client.on_log = on_log
+    
+    # Configure TLS based on settings
+    if app.config['MQTT_USE_TLS']:
+        try:
+            mqtt_client.tls_set(tls_version=ssl.PROTOCOL_TLS)
+            print("TLS configured successfully")
+        except Exception as e:
+            print(f"TLS configuration failed: {e}")
+            print("Attempting connection without TLS...")
+    else:
+        print("TLS disabled by configuration")
+    
+    # Connect with Railway-optimized settings
+    keepalive = app.config['MQTT_KEEPALIVE']
+    print(f"Connecting with keepalive: {keepalive} seconds")
+    mqtt_client.connect(app.config['MQTT_BROKER'], app.config['MQTT_PORT'], keepalive)
+    mqtt_client.loop_start()
+    print("MQTT client started successfully")
+    
+except Exception as e:
+    print(f"Failed to initialize MQTT client: {e}")
+    print("MQTT functionality will be disabled")
+    mqtt_client = None
 
 
 # Create tables in the database
@@ -336,6 +385,23 @@ def warning():
 @jwt_required()
 def get_device_status():
     return jsonify(device_data)
+
+@app.route("/api/mqtt-status", methods=["GET"])
+@jwt_required()
+def get_mqtt_status():
+    if mqtt_client is None:
+        return jsonify({"status": "disabled", "message": "MQTT client not initialized"})
+    
+    try:
+        is_connected = mqtt_client.is_connected()
+        return jsonify({
+            "status": "connected" if is_connected else "disconnected",
+            "broker": app.config['MQTT_BROKER'],
+            "port": app.config['MQTT_PORT'],
+            "connected": is_connected
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
   
 @app.route("/api/lights", methods=["POST"])
 @jwt_required()

@@ -10,7 +10,16 @@ class Config:
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=10)
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    # MQTT Configuration with Railway-specific handling
     MQTT_BROKER = os.getenv("MQTT_BROKER")
-    MQTT_PORT = int(os.getenv("MQTT_PORT"))
+    MQTT_PORT = int(os.getenv("MQTT_PORT", "1883"))  # Default to 1883 if not specified
     MQTT_USER = os.getenv("MQTT_USER")
     MQTT_PASSWORD = os.getenv("MQTT_PASSWORD")
+    
+    # Railway-specific settings
+    MQTT_USE_TLS = os.getenv("MQTT_USE_TLS", "true").lower() == "true"
+    MQTT_KEEPALIVE = int(os.getenv("MQTT_KEEPALIVE", "60"))  # Shorter keepalive for Railway
+    
+    # Check if running on Railway
+    IS_RAILWAY = os.getenv("RAILWAY_ENVIRONMENT") is not None or os.getenv("PORT") is not None
